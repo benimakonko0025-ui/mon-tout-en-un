@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0d0e11"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script src="tea.js"></script>
+<title>Académie Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0e11;--card:rgba(255,255,255,.045);--line:rgba(255,255,255,.1);--ink:#f2f3f5;--muted:#9aa1ac;--accent:#ff6a1a;--accent2:#ff8a3d;--ok:#4fd08a;--bad:#ff8080}
+body{font-family:Outfit,system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));line-height:1.55}
+.wrap{max-width:780px;margin:0 auto}
+h1{font-size:23px;font-weight:600}h1 b{color:var(--accent)}
+.sub{color:var(--muted);font-size:13.5px;margin:2px 0 14px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+.tabs button{flex:none;font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);border-radius:999px;padding:8px 14px;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 16px;margin-bottom:12px}
+.card h2{font-size:17px;font-weight:600;margin-bottom:4px}
+.card h3{font-size:15px;font-weight:600;margin:12px 0 4px;color:var(--accent2)}
+.hint{color:var(--muted);font-size:13px}
+button.b,label.b{font:inherit;font-weight:600;border:0;border-radius:11px;padding:10px 14px;cursor:pointer;background:rgba(255,255,255,.1);color:var(--ink)}
+button.b.p{background:var(--accent);color:#fff}
+button.b:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar{height:7px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.mod{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.mod small{color:var(--muted);font-size:12.5px}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:99px;padding:2px 9px;background:rgba(255,255,255,.08);color:var(--muted);margin-left:6px}
+.tag.ok{background:rgba(79,208,138,.16);color:var(--ok)}
+.lesson ul{margin:6px 0 4px 20px}.lesson li{margin:5px 0}
+.lesson p{margin:6px 0}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.kv label{font-size:12.5px;color:var(--muted);display:block}
+.kv input,.kv select,input.t{width:100%;font:inherit;color:var(--ink);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:9px 10px;margin-top:3px}
+.res{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,106,26,.1);border:1px solid rgba(255,106,26,.3);font-size:14.5px}
+.res b{font-size:17px}
+.opt{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-top:8px;cursor:pointer}
+.opt.good{border-color:var(--ok);background:rgba(79,208,138,.14)}
+.opt.bad{border-color:var(--bad);background:rgba(255,128,128,.12)}
+.exp{margin-top:10px;font-size:14px;color:var(--muted)}
+.gl{display:grid;gap:8px}
+.gl div{padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.gl b{color:var(--accent2)}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-child{border-bottom:0}
+.chk input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+.chk.done span{color:var(--muted);text-decoration:line-through}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px}.stat small{color:var(--muted);font-size:12px}
+#status{color:var(--muted);font-size:12.5px;min-height:1.2em;margin-top:10px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Académie <b>Planner</b></h1>
+  <div class="sub">Planification import et superintendance : leçons, calculs, entraînement du jour.</div>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-t="home" aria-selected="true">Aujourd'hui</button>
+    <button role="tab" data-t="cours" aria-selected="false">Parcours</button>
+    <button role="tab" data-t="calc" aria-selected="false">Calculs</button>
+    <button role="tab" data-t="check" aria-selected="false">Check-lists</button>
+    <button role="tab" data-t="lex" aria-selected="false">Lexique</button>
+  </div>
+  <main id="view"></main>
+  <div id="status" role="status" aria-live="polite"></div>
+</div>
+
+<div id="bmk-nav"><button id="bmk-btn" aria-label="Mes apps">☰</button><div id="bmk-panel"><a href="index.html" class="bmk-home">⌂ Toutes mes apps</a><a href="moncap.html">🧭 Mon Cap 2026</a><a href="shift.html">⚓ Shift Planeur</a><a href="formation.html">🎓 Académie Planner</a><a href="budget.html">💰 Budget</a><a href="carnet.html">🪞 Carnet de Cohérence</a><a href="forex.html">📈 Desk Forex</a><a href="conteneur.html">📦 Anatomie du conteneur</a><a href="notes.html">📖 Mes documents</a></div></div><style>#bmk-nav{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483000;font-family:system-ui,sans-serif}#bmk-btn{width:30px;height:54px;border:0;border-radius:0 12px 12px 0;background:#ff6a1a;color:#fff;font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;opacity:.85;padding:0}#bmk-panel{display:none;position:absolute;left:34px;top:50%;transform:translateY(-50%);background:#17191e;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5)}#bmk-nav.on #bmk-panel{display:block}#bmk-panel a{display:block;padding:10px 12px;border-radius:9px;color:#f2f3f5;text-decoration:none;font-size:14.5px}#bmk-panel a:hover{background:rgba(255,255,255,.08)}#bmk-panel .bmk-home{color:#ff8a3d;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);border-radius:9px 9px 0 0}</style><script>(function(){var n=document.getElementById("bmk-nav");document.getElementById("bmk-btn").addEventListener("click",function(e){e.stopPropagation();n.classList.toggle("on")});document.addEventListener("click",function(e){if(!n.contains(e.target))n.classList.remove("on")})})();</script>
+
+<script>
+(function(){
+"use strict";
+/* ================= CONTENU ================= */
+const MODS=[
+{id:"m1",t:"Les bases du terminal",d:"Le trajet d'un conteneur import et les acteurs",L:[
+ {t:"Le flux import",p:["Un conteneur import suit toujours le même chemin : navire, quai, parc, puis sortie par la porte.","Le planner prépare ce chemin avant l'arrivée du navire : où décharger, dans quel ordre, et où poser chaque conteneur dans le parc."],u:["Avant l'arrivée : réception du bay plan et de la liste de déchargement, préparation du parc.","À quai : déchargement par les portiques ou les grues, transfert vers le parc.","Au parc : stockage, visite douane éventuelle, branchement des reefers.","Livraison : le client ou son transitaire vient chercher le conteneur après les formalités."]},
+ {t:"Qui fait quoi",u:["Armateur (shipping line) : possède ou exploite le navire, vend le transport.","Agent maritime / consignataire : représente l'armateur au port, transmet les documents.","Terminal : décharge, stocke et livre les conteneurs.","Douane : autorise ou bloque la sortie de la marchandise.","Transitaire (freight forwarder) : s'occupe des formalités pour le client.","Bord (chief officer) : responsable de la stabilité et de l'arrimage du navire."]},
+ {t:"Conteneurs et unités",u:["20 pieds = 1 EVP (TEU). 40 pieds = 2 EVP.","Un mouvement (move) = un levage. Un 40 pieds compte 1 mouvement mais 2 EVP.","Types courants : dry (DV), high cube (HC), reefer (RF), open top (OT), flat rack (FR), citerne (TK).","Tare = poids du conteneur vide. Poids brut = tare + marchandise.","VGM : masse brute vérifiée, exigée par la convention SOLAS avant tout embarquement à l'export."]},
+ {t:"Le numéro de conteneur",p:["Norme ISO 6346 : 4 lettres, 6 chiffres, puis 1 chiffre de contrôle."],u:["Les 3 premières lettres : le code du propriétaire.","La 4e lettre : la catégorie. U = conteneur, J = équipement, Z = châssis.","Le dernier chiffre se calcule à partir des 10 premiers caractères. S'il ne correspond pas, il y a une erreur de saisie.","L'onglet Calculs contient un vérificateur de numéro."]}
+]},
+{id:"m2",t:"Lire un bay plan",d:"Baie, rangée, étage : trouver n'importe quelle position",L:[
+ {t:"Baie, rangée, étage",p:["Chaque position à bord a une adresse en 6 chiffres : baie (bay), rangée (row), étage (tier). Exemple : 06 03 82."],u:["Baie : position dans la longueur du navire, de l'avant vers l'arrière.","Rangée : position dans la largeur.","Étage : position en hauteur."]},
+ {t:"Les baies",u:["Numéros impairs (01, 03, 05) : emplacements de 20 pieds.","Numéros pairs (02, 06, 10) : emplacements de 40 pieds, à cheval sur deux baies de 20.","Exemple : la baie 02 couvre les baies 01 et 03."]},
+ {t:"Les rangées et les étages",u:["Rangée 00 : l'axe du navire, quand il existe.","Rangées impaires (01, 03, 05) : vers tribord (starboard).","Rangées paires (02, 04, 06) : vers bâbord (port).","Étages en cale : 02, 04, 06… en montant.","Étages en pontée : à partir de 82 (parfois 80), puis 84, 86…"]},
+ {t:"Ce que le plan t'apprend",u:["Le port de déchargement de chaque conteneur, souvent par couleur ou par code.","Le poids, le type, les marchandises dangereuses, les reefers et les hors gabarit.","Les panneaux de cale (hatch covers) : rien ne sort de la cale tant que la pontée au-dessus n'est pas libérée.","Les restows : conteneurs à déplacer alors qu'ils ne sont pas pour ton port."]}
+]},
+{id:"m3",t:"Planifier le navire",d:"Séquence, répartition des portiques, contraintes",L:[
+ {t:"L'ordre des opérations",u:["Déchargement : la pontée d'abord, puis le panneau de cale, puis la cale.","Chargement : la cale d'abord, on referme le panneau, puis la pontée.","En général on décharge une baie avant de la recharger, sauf organisation en double cycle.","Les restows se planifient avec le bord : à quai ou de bord à bord."]},
+ {t:"Le crane split",p:["C'est la répartition des mouvements entre les portiques. Le but : que tous finissent à peu près en même temps."],u:["Compter les mouvements par baie, puis regrouper les baies par portique.","Le portique qui a le plus de travail s'appelle le long crane : c'est lui qui fixe l'heure de fin du navire.","Si un portique finit bien avant les autres, on lui redonne des baies du long crane, si la distance le permet.","Deux portiques ne peuvent pas travailler côte à côte : il faut un écart, souvent une baie de 40 pieds, selon les engins."]},
+ {t:"Les contraintes à vérifier",u:["Panneaux de cale : où les poser, et dans quel ordre.","Saisissage (lashing) : il faut désaisir avant de décharger et saisir après le chargement.","Marchandises dangereuses, reefers, hors gabarit : traitement et position particuliers.","Stabilité : toute modification de séquence importante se valide avec le bord.","Disponibilité des engins de parc : le portique ne doit pas attendre les tracteurs."]},
+ {t:"Les messages EDI",u:["BAPLIE : le bay plan, positions occupées et libres.","MOVINS : les instructions d'arrimage données au terminal.","COPRAR : l'ordre de déchargement ou de chargement.","COARRI : le compte rendu des conteneurs déchargés ou chargés.","CODECO : le compte rendu des entrées et sorties par la porte.","IFTDGN : la déclaration des marchandises dangereuses."]}
+]},
+{id:"m4",t:"Cadence et productivité",d:"Mesurer, calculer, annoncer une heure de fin",L:[
+ {t:"Les indicateurs",p:["Les définitions exactes varient d'un terminal à l'autre. Utilise toujours celles de ton terminal dans les rapports."],u:["Cadence brute par portique (GMPH) : mouvements ÷ heures brutes du portique, arrêts compris.","Cadence nette (NMPH) : mouvements ÷ heures réellement travaillées, arrêts déduits.","Productivité à quai (BMPH) : total des mouvements du navire ÷ heures passées à quai.","Intensité de portiques (crane intensity) : total des heures portique ÷ heures de travail du navire. C'est le nombre moyen de portiques engagés."]},
+ {t:"Exemple chiffré",p:["Un portique fait 168 mouvements en 7 heures, dont 1 heure d'arrêt."],u:["Cadence brute : 168 ÷ 7 = 24 mouvements par heure.","Cadence nette : 168 ÷ 6 = 28 mouvements par heure.","L'écart entre les deux montre le poids des arrêts : c'est là que se gagne le temps."]},
+ {t:"Estimer la fin des opérations",u:["Pour chaque portique : mouvements restants ÷ cadence réelle observée = heures restantes.","Le portique qui a le plus d'heures restantes donne l'heure de fin.","Ajouter les temps fixes : panneaux de cale, saisissage, relèves, pauses.","Recalculer à chaque relève : une estimation vieille de quatre heures ne vaut plus rien."]},
+ {t:"Enregistrer les arrêts",u:["Noter chaque arrêt : heure de début, heure de fin, cause, portique concerné.","Classer la cause : terminal (panne, attente tracteur), navire (saisissage, panneau, ballast), météo, tiers.","Ces relevés servent au rapport d'escale et aux discussions avec l'armateur. Sans heure précise, un arrêt ne se prouve pas."]}
+]},
+{id:"m5",t:"Le parc import",d:"Empiler pour livrer vite, sans déplacements inutiles",L:[
+ {t:"Pourquoi l'import est difficile",p:["À l'export on connaît l'ordre d'embarquement. À l'import, on ne sait pas quel client viendra en premier."],u:["Chaque conteneur placé au-dessus d'un autre peut devenir un déplacement inutile (rehandle).","Plus les piles sont hautes, plus il y a de déplacements à la livraison.","L'objectif : livrer avec le moins de mouvements improductifs possible."]},
+ {t:"Règles d'empilage",u:["Séparer par taille : jamais de 20 pieds sur un 40 pieds.","Regrouper par navire et par date d'arrivée : les plus anciens partent en général d'abord.","Regrouper par client ou par connaissement quand les lots sont importants.","Zones réservées : reefers près des prises, marchandises dangereuses, hors gabarit, visite douane.","Les lourds en bas, les légers en haut, et respecter la hauteur autorisée."]},
+ {t:"Occupation et séjour",u:["Taux d'occupation = EVP présents ÷ capacité du parc.","On considère souvent qu'au-delà de 70 à 80 % le parc perd en efficacité : moins de place pour manœuvrer, plus de déplacements.","Durée de séjour (dwell time) : nombre moyen de jours entre le déchargement et la sortie.","Un séjour long remplit le parc. Le suivre aide à prévoir la place avant le prochain navire."]},
+ {t:"Préparer le parc avant le navire",u:["Compter les emplacements libres par zone et par taille.","Réserver la place du navire attendu avant son arrivée.","Faire le rangement (housekeeping) pendant les heures creuses.","Prévoir les prises reefer disponibles et les places dangereux.","Vérifier que les allées de circulation restent libres."]}
+]},
+{id:"m6",t:"Cargaisons spéciales",d:"Reefers, dangereux, hors gabarit",L:[
+ {t:"Les reefers",u:["Brancher le plus vite possible après le déchargement.","Vérifier la température de consigne (set point) sur le document et sur l'afficheur.","Relever la température à intervalles réguliers, selon la procédure du terminal, et noter chaque relevé.","Ne jamais modifier un réglage sans instruction écrite.","Signaler tout écart ou alarme immédiatement : la marchandise se perd en quelques heures."]},
+ {t:"Les marchandises dangereuses",p:["Le code IMDG les répartit en 9 classes."],u:["1 Explosifs · 2 Gaz · 3 Liquides inflammables","4 Solides inflammables · 5 Comburants et peroxydes","6 Toxiques et infectieux · 7 Radioactifs","8 Corrosifs · 9 Dangers divers","La ségrégation fixe les distances à respecter entre classes, à bord comme au parc.","Toujours vérifier la déclaration, la classe, le numéro ONU et les étiquettes avant de manipuler."]},
+ {t:"Les hors gabarit",u:["OOG (out of gauge) : la marchandise dépasse du conteneur en hauteur, en largeur ou en longueur.","Il faut un matériel de levage adapté et souvent plus de temps par mouvement.","Rien ne peut être posé au-dessus ni parfois à côté : cela consomme des emplacements.","Prévoir leur place et leur moment dans la séquence, pas à la dernière minute."]}
+]},
+{id:"m7",t:"Stabilité et arrimage",d:"Les notions qu'un superintendent doit comprendre",L:[
+ {t:"Les mots de la stabilité",p:["La stabilité est sous la responsabilité du bord. Le terminal doit comprendre ces notions pour ne pas la mettre en danger."],u:["Gîte (list) : le navire penche sur un côté.","Assiette (trim) : différence de tirant d'eau entre l'avant et l'arrière.","GM : hauteur métacentrique, la mesure de la stabilité initiale. Des poids lourds en bas l'augmentent, des poids lourds en haut la réduisent.","Le ballast sert à corriger la gîte et l'assiette pendant les opérations."]},
+ {t:"Ce que le terminal doit respecter",u:["Les plus lourds en bas des piles, les plus légers en haut.","Le poids maximal par pile (stack weight) indiqué par le navire.","Travailler de façon équilibrée entre bâbord et tribord pour limiter la gîte.","La ligne de visibilité depuis la passerelle : pas de pontée trop haute à l'avant.","Tout changement par rapport au plan validé se demande au chief officer."]},
+ {t:"Le saisissage",u:["Twistlocks : verrous placés aux coins, entre deux conteneurs. Manuels, semi-automatiques ou automatiques.","Barres de saisissage (lashing rods) et ridoirs (turnbuckles) : tiennent les étages bas de la pontée.","En cale, les glissières (cell guides) guident et maintiennent les piles.","Le navire ne part pas tant que le saisissage n'est pas terminé et accepté par le bord."]}
+]},
+{id:"m8",t:"Le superintendent",d:"Le lien entre le navire et le terminal",L:[
+ {t:"Son rôle",u:["Il suit l'escale du début à la fin pour le compte de l'armateur ou du terminal.","Il fait le lien entre le bord, le planner, les chefs de quai et l'agent.","Il veille à trois choses : la sécurité, le respect du plan, le respect des délais.","Il consigne les faits : heures, arrêts, dommages, écarts."]},
+ {t:"Avant l'arrivée",u:["Vérifier les documents reçus : bay plan, liste de déchargement, dangereux, reefers, hors gabarit.","Valider la séquence et la répartition des portiques avec le planner.","Confirmer le poste à quai, l'heure d'arrivée, les équipes et les engins.","Repérer les points sensibles : restows, panneaux de cale, cargaisons spéciales.","Tenir la réunion de préparation avec tous les intervenants."]},
+ {t:"Pendant les opérations",u:["Rencontrer le chief officer dès l'accostage et confirmer le plan.","Suivre l'avancement réel par rapport au plan, portique par portique.","Noter chaque arrêt avec son heure et sa cause.","Faire constater tout dommage au moment où il est découvert, avec photo et signature si possible.","Suivre les reefers et les dangereux jusqu'à leur zone."]},
+ {t:"Avant le départ",u:["Vérifier que tout ce qui devait être déchargé et chargé l'a été.","Obtenir le bay plan final et le faire valider par le bord.","Confirmer la fin du saisissage.","Faire signer le relevé des faits (Statement of Facts) : heures d'arrivée, de début, de fin, arrêts.","Rédiger le rapport de départ (Terminal Departure Report) avec les chiffres de l'escale."]}
+]},
+{id:"m9",t:"Sécurité au quai",d:"Les réflexes qui évitent l'accident",L:[
+ {t:"Les règles de base",u:["Porter les équipements : casque, gilet haute visibilité, chaussures de sécurité, gants.","Ne jamais passer ni rester sous une charge suspendue.","Rester visible des conducteurs d'engins et hors de leur trajectoire.","Respecter les zones interdites pendant le travail des portiques."]},
+ {t:"Sur le navire",u:["Le désaisissage et le saisissage se font avec les protections prévues, jamais sous un levage en cours.","Attention aux chutes : bords de cale, panneaux ouverts, passerelles.","Les twistlocks tombés sont un danger : casque obligatoire à quai et à bord."]},
+ {t:"Savoir arrêter",u:["Toute personne peut arrêter une opération dangereuse : c'est un devoir.","Vent fort : les portiques s'arrêtent à la limite fixée par le terminal.","Communication radio courte et claire, avec répétition de l'ordre reçu.","Après un incident : sécuriser, alerter, puis consigner les faits et l'heure."]}
+]},
+{id:"m10",t:"Rapports et communication",d:"Écrire court, exact, et à l'heure",L:[
+ {t:"Un bon rapport de relève",u:["Ce qui est fait, ce qui reste, ce qui bloque.","Des chiffres : mouvements réalisés, restants, cadence, heure de fin estimée.","Les arrêts avec leurs heures et leurs causes.","Les consignes pour l'équipe suivante.","Une phrase par idée. Pas d'opinion, des faits."]},
+ {t:"Formules utiles en anglais",u:["Vessel all fast at 06:40. Navire amarré à 06 h 40.","Operations commenced at 07:15. Début des opérations à 07 h 15.","Crane 2 stopped from 10:05 to 10:40 due to breakdown. Portique 2 arrêté de 10 h 05 à 10 h 40 pour panne.","Discharge completed, loading in progress. Déchargement terminé, chargement en cours.","Estimated time of completion 22:30. Fin des opérations estimée à 22 h 30.","Please confirm the final bay plan. Merci de confirmer le bay plan final."]},
+ {t:"Rester à la hauteur",u:["Chaque escale : noter une chose qui a bien marché et une chose à améliorer.","Comparer la cadence prévue et la cadence réelle, et chercher la cause de l'écart.","Faire l'entraînement du jour : cinq questions suffisent pour garder les réflexes.","Relire un module par semaine."]}
+]}
+];
+
+const Q=[
+["m1","Un 40 pieds compte pour combien d'EVP ?",["1","2","4"],1,"20 pieds = 1 EVP, 40 pieds = 2 EVP."],
+["m1","Un portique décharge 10 conteneurs de 40 pieds. Combien de mouvements ?",["10","20","40"],0,"Un mouvement = un levage, quelle que soit la taille."],
+["m1","Dans un numéro de conteneur, à quoi sert le dernier chiffre ?",["Indiquer la taille","Contrôler la saisie","Indiquer le pays"],1,"C'est le chiffre de contrôle, calculé à partir des 10 premiers caractères."],
+["m1","Que désigne la 4e lettre « U » d'un numéro de conteneur ?",["Un conteneur","Un châssis","Un navire"],0,"U = conteneur, J = équipement, Z = châssis."],
+["m1","Qui est responsable de la stabilité du navire ?",["Le planner","Le bord (chief officer)","Le transitaire"],1,"La stabilité et l'arrimage relèvent du bord."],
+["m1","Que signifie VGM ?",["Vitesse garantie maximale","Masse brute vérifiée","Volume global marchandise"],1,"Verified Gross Mass, exigée par SOLAS avant embarquement."],
+["m2","Dans l'adresse 06 03 82, que représente « 82 » ?",["La baie","La rangée","L'étage"],2,"L'ordre est baie, rangée, étage."],
+["m2","Un numéro de baie pair indique en général :",["Un emplacement de 20 pieds","Un emplacement de 40 pieds","Une cale vide"],1,"Les baies paires sont des positions de 40 pieds."],
+["m2","La baie 02 couvre quelles baies de 20 pieds ?",["01 et 03","02 et 04","03 et 05"],0,"Une baie paire est à cheval sur les deux baies impaires voisines."],
+["m2","Une rangée de numéro impair se trouve :",["À bâbord","À tribord","Dans l'axe"],1,"Impair vers tribord, pair vers bâbord, 00 dans l'axe."],
+["m2","L'étage 84 se situe :",["En cale","En pontée","Sous la ligne de flottaison"],1,"Les étages de pontée commencent à 82 (parfois 80)."],
+["m2","Qu'est-ce qu'un restow ?",["Un conteneur endommagé","Un conteneur déplacé alors qu'il n'est pas pour ce port","Un conteneur vide"],1,"On le déplace pour atteindre un autre conteneur ou réorganiser l'arrimage."],
+["m3","Au déchargement, on commence par :",["La cale","La pontée","Peu importe"],1,"Pontée, puis panneau de cale, puis cale."],
+["m3","Au chargement, on commence par :",["La cale","La pontée","Les reefers"],0,"Cale, fermeture du panneau, puis pontée."],
+["m3","Qu'est-ce que le long crane ?",["Le portique le plus haut","Le portique qui a le plus de travail","Le portique en panne"],1,"C'est lui qui fixe l'heure de fin du navire."],
+["m3","Le but d'un bon crane split est que les portiques :",["Finissent à peu près en même temps","Travaillent la même baie","Fassent tous des 40 pieds"],0,"On équilibre les charges de travail."],
+["m3","Quel message EDI contient le bay plan ?",["CODECO","BAPLIE","COARRI"],1,"BAPLIE : positions occupées et libres."],
+["m3","Quel message rend compte des conteneurs déchargés et chargés ?",["COARRI","MOVINS","IFTDGN"],0,"COARRI = compte rendu de déchargement et chargement."],
+["m3","Quel message rend compte des passages à la porte ?",["BAPLIE","COPRAR","CODECO"],2,"CODECO = entrées et sorties par la porte."],
+["m4","168 mouvements en 7 heures brutes : quelle cadence brute ?",["21","24","28"],1,"168 ÷ 7 = 24 mouvements par heure."],
+["m4","168 mouvements, 7 heures dont 1 heure d'arrêt : cadence nette ?",["24","26","28"],2,"168 ÷ 6 heures travaillées = 28."],
+["m4","Il reste 150 mouvements à un portique qui tourne à 25 par heure. Combien d'heures ?",["5","6","7,5"],1,"150 ÷ 25 = 6 heures."],
+["m4","3 portiques ont travaillé 30 heures au total sur 12 heures de travail navire. Intensité ?",["2,5","3","3,6"],0,"30 ÷ 12 = 2,5 portiques en moyenne."],
+["m4","Pour annoncer une heure de fin, on se base sur :",["La moyenne des portiques","Le portique qui a le plus d'heures restantes","Le portique le plus rapide"],1,"Le long crane décide de la fin."],
+["m4","Un arrêt sans heure de début ni de fin :",["Se prouve facilement","Ne peut pas être défendu dans un rapport","N'a pas d'importance"],1,"Heure de début, de fin et cause : les trois sont nécessaires."],
+["m5","Pourquoi l'import génère-t-il plus de déplacements inutiles ?",["Les conteneurs sont plus lourds","On ignore l'ordre de sortie","Les piles sont plus basses"],1,"On ne sait pas quel client viendra en premier."],
+["m5","Parc de 4 000 EVP avec 3 000 EVP présents : taux d'occupation ?",["65 %","75 %","85 %"],1,"3 000 ÷ 4 000 = 75 %."],
+["m5","Que mesure le dwell time ?",["Le temps de déchargement","Le nombre moyen de jours de séjour au parc","Le poids moyen"],1,"Du déchargement à la sortie."],
+["m5","Peut-on poser un 20 pieds sur un 40 pieds ?",["Oui","Non","Seulement vide"],1,"On sépare par taille."],
+["m5","Où place-t-on les reefers ?",["Près des prises électriques","Au fond du parc","Sous les dry"],0,"Ils doivent être branchés rapidement."],
+["m5","Quand faire le rangement du parc ?",["Pendant le navire","Pendant les heures creuses","Jamais"],1,"Le housekeeping se fait hors pointe."],
+["m6","Un reefer vient d'être déchargé. Première action ?",["Le brancher","L'ouvrir","Attendre la douane"],0,"Brancher au plus vite, puis vérifier la consigne."],
+["m6","Peut-on modifier la température de consigne de sa propre initiative ?",["Oui","Non, sans instruction écrite","Oui si l'alarme sonne"],1,"Jamais sans instruction écrite."],
+["m6","Combien de classes compte le code IMDG ?",["7","9","12"],1,"Neuf classes."],
+["m6","La classe 3 correspond aux :",["Gaz","Liquides inflammables","Corrosifs"],1,"Classe 3 = liquides inflammables."],
+["m6","La classe 8 correspond aux :",["Corrosifs","Explosifs","Radioactifs"],0,"Classe 8 = corrosifs."],
+["m6","Que veut dire OOG ?",["Hors gabarit","Hors service","Hors douane"],0,"Out of gauge : la marchandise dépasse du conteneur."],
+["m7","Le navire penche sur un côté. C'est :",["L'assiette","La gîte","Le tirant d'eau"],1,"Gîte = list. Assiette = trim."],
+["m7","Où place-t-on les conteneurs les plus lourds d'une pile ?",["En haut","En bas","Au milieu"],1,"Lourds en bas, légers en haut."],
+["m7","Des poids lourds placés haut font :",["Augmenter la stabilité","Diminuer la stabilité","Rien"],1,"Ils réduisent le GM."],
+["m7","Qui valide un changement par rapport au plan d'arrimage ?",["Le chef de quai","Le chief officer","Le conducteur du portique"],1,"Toute modification se demande au bord."],
+["m7","À quoi sert un twistlock ?",["Verrouiller deux conteneurs entre eux","Mesurer le poids","Ouvrir les portes"],0,"C'est le verrou de coin."],
+["m7","Le navire peut-il partir avant la fin du saisissage ?",["Oui","Non","Oui par beau temps"],1,"Le saisissage doit être terminé et accepté."],
+["m8","Les trois priorités du superintendent :",["Sécurité, plan, délais","Vitesse, coût, volume","Douane, parc, porte"],0,"Sécurité, respect du plan, respect des délais."],
+["m8","Un dommage est découvert sur un conteneur. Quand le faire constater ?",["À la fin de l'escale","Tout de suite","Le lendemain"],1,"Au moment de la découverte, avec photo et signature si possible."],
+["m8","Que contient le Statement of Facts ?",["Les heures et les arrêts de l'escale","La liste des clients","Le plan du parc"],0,"Arrivée, début, fin, arrêts : les faits datés."],
+["m8","Qui rencontre-t-on en premier à l'accostage ?",["Le transitaire","Le chief officer","Le douanier"],1,"On confirme le plan avec lui."],
+["m8","Avant le départ, quel document fait-on valider par le bord ?",["Le bay plan final","Le bon de sortie","La facture"],0,"Le bay plan final doit correspondre à la réalité."],
+["m9","Peut-on rester sous une charge suspendue ?",["Oui avec un casque","Jamais","Oui si le portique est lent"],1,"Jamais, quelles que soient les protections."],
+["m9","Qui peut arrêter une opération dangereuse ?",["Seulement le chef","Toute personne présente","Seulement le bord"],1,"C'est un devoir pour chacun."],
+["m9","Après un incident, l'ordre des actions est :",["Consigner, alerter, sécuriser","Sécuriser, alerter, consigner","Alerter, consigner, sécuriser"],1,"D'abord mettre en sécurité."],
+["m10","Un rapport de relève doit surtout contenir :",["Des opinions","Des faits et des chiffres","Des excuses"],1,"Fait, reste, blocages, chiffres, consignes."],
+["m10","« Estimated time of completion » signifie :",["Heure d'arrivée estimée","Fin des opérations estimée","Heure de départ réelle"],1,"ETC = fin estimée des opérations."],
+["m10","« Vessel all fast » signifie :",["Navire amarré","Navire rapide","Navire parti"],0,"Toutes les amarres sont à poste."]
+].map((x,i)=>({id:"q"+i,m:x[0],q:x[1],o:x[2],a:x[3],e:x[4]}));
+
+const LEX=[["All fast","Navire amarré, toutes amarres à poste"],["Bay plan","Plan d'arrimage du navire, baie par baie"],["Bay / Row / Tier","Baie / rangée / étage"],["Berth","Poste à quai"],["BMPH","Mouvements par heure à quai, pour tout le navire"],["Breakdown","Panne"],["Cell guides","Glissières de cale"],["Chief officer","Second capitaine, responsable de la cargaison"],["Crane intensity","Nombre moyen de portiques engagés"],["Crane split","Répartition des mouvements entre portiques"],["Customs","Douane"],["Discharge","Déchargement"],["Draft","Tirant d'eau"],["Dwell time","Durée de séjour au parc"],["EIR","Bon d'échange d'équipement, constate l'état du conteneur"],["ETA / ETD","Heure estimée d'arrivée / de départ"],["ETC","Heure estimée de fin des opérations"],["Gang","Équipe de manutention"],["Gate","Porte du terminal"],["GMPH","Cadence brute d'un portique, mouvements par heure"],["Hatch cover","Panneau de cale"],["Hold","Cale"],["Housekeeping","Rangement du parc"],["IMDG","Code maritime des marchandises dangereuses"],["Lashing","Saisissage"],["List","Gîte"],["Long crane","Portique le plus chargé, fixe l'heure de fin"],["Move","Mouvement, un levage"],["On deck","En pontée"],["OOG","Hors gabarit"],["Port / Starboard","Bâbord / tribord"],["Quay crane","Portique de quai"],["Reefer","Conteneur frigorifique"],["Rehandle / Shifting","Déplacement improductif"],["Restow","Réarrimage d'un conteneur à bord"],["Set point","Température de consigne"],["SOF","Relevé des faits de l'escale"],["Stack weight","Poids maximal d'une pile"],["Stowage","Arrimage"],["TDR","Rapport de départ du terminal"],["TEU","EVP, équivalent vingt pieds"],["Trim","Assiette"],["Twistlock","Verrou de coin"],["VGM","Masse brute vérifiée"],["Yard","Parc à conteneurs"],["Yard occupancy","Taux d'occupation du parc"]];
+
+const CHK=[
+{id:"c1",t:"Avant l'arrivée du navire",i:["Bay plan et liste de déchargement reçus et lus","Dangereux, reefers et hors gabarit repérés","Séquence et répartition des portiques prêtes","Place réservée au parc, par zone et par taille","Prises reefer disponibles vérifiées","Équipes et engins confirmés","Poste à quai et heure d'arrivée confirmés"]},
+{id:"c2",t:"Pendant les opérations",i:["Plan confirmé avec le chief officer","Avancement comparé au plan à chaque heure","Chaque arrêt noté avec heure et cause","Reefers branchés et consignes vérifiées","Dangereux dirigés vers leur zone","Dommages constatés au moment de la découverte","Heure de fin recalculée et communiquée"]},
+{id:"c3",t:"Avant le départ",i:["Tout le déchargement prévu est fait","Tout le chargement prévu est fait","Bay plan final validé par le bord","Saisissage terminé et accepté","Relevé des faits signé","Rapport de départ rédigé","Consignes passées à la relève"]}
+];
+
+/* ================= ÉTAT ================= */
+const KEY="formation-v1";
+let S={done:{},q:{},days:{},chk:{},t:0};
+try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&typeof o==="object")S=Object.assign(S,o)}catch(e){}
+["done","q","days","chk"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={}});
+let col=null,timer=null;
+const $=id=>document.getElementById(id);
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+const say=t=>{$("status").textContent=t||""};
+const p2=n=>String(n).padStart(2,"0");
+const dayKey=(d)=>{d=d||new Date();return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
+function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}clearTimeout(timer);timer=setTimeout(push,900)}
+async function push(){if(!col)return;try{await col.doc("form_state").set({v:JSON.stringify(S),t:S.t});say("Progression enregistrée dans ton compte.")}catch(e){say("Progression gardée sur cet appareil pour le moment.")}}
+function streak(){let n=0;const d=new Date();if(!S.days[dayKey(d)])d.setDate(d.getDate()-1);while(S.days[dayKey(d)]){n++;d.setDate(d.getDate()-1)}return n}
+const lessonsTotal=MODS.reduce((a,m)=>a+m.L.length,0);
+const lessonsDone=()=>MODS.reduce((a,m)=>a+m.L.filter((_,i)=>S.done[m.id+"."+i]).length,0);
+const mastered=()=>Q.filter(q=>(S.q[q.id]||0)>=2).length;
+
+/* ================= VUES ================= */
+let tab="home",cur=null;
+function show(t){tab=t;cur=null;document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.t===t)));draw()}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+function draw(){const v=$("view");v.textContent="";({home:vHome,cours:vCours,calc:vCalc,check:vCheck,lex:vLex})[tab](v);window.scrollTo(0,0)}
+
+function vHome(v){
+  const st=el("div","stat");
+  [[streak(),"jours de suite"],[lessonsDone()+" / "+lessonsTotal,"leçons lues"],[mastered()+" / "+Q.length,"questions acquises"]].forEach(([n,l])=>{const d=el("div");d.appendChild(el("b",null,String(n)));d.appendChild(el("small",null,l));st.appendChild(d)});
+  v.appendChild(st);
+  const c=el("div","card");c.style.marginTop="12px";c.appendChild(el("h2",null,"Entraînement du jour"));
+  const today=S.days[dayKey()];
+  c.appendChild(el("p","hint",today?"Fait aujourd'hui : "+today+" / 5. Tu peux recommencer une série.":"Cinq questions, deux minutes. Celles que tu rates reviennent plus souvent."));
+  const b=el("button","b p",today?"Refaire une série":"Commencer");b.style.marginTop="10px";b.addEventListener("click",()=>startQuiz(pick(5),"Entraînement du jour",true));c.appendChild(b);v.appendChild(c);
+  const next=nextLesson();
+  if(next){const n=el("div","card");n.appendChild(el("h2",null,"Leçon suivante"));n.appendChild(el("p","hint",next.m.t+" · "+next.m.L[next.i].t));
+    const nb=el("button","b","Ouvrir");nb.style.marginTop="10px";nb.addEventListener("click",()=>{tab="cours";document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",String(x.dataset.t==="cours")));openLesson(next.m,next.i)});n.appendChild(nb);v.appendChild(n)}
+  else{const n=el("div","card");n.appendChild(el("h2",null,"Parcours terminé"));n.appendChild(el("p","hint","Toutes les leçons sont lues. Garde les réflexes avec l'entraînement du jour et relis un module par semaine."));v.appendChild(n)}
+  v.appendChild(el("p","hint","Contenu général du métier. Les procédures et les définitions de ton terminal passent toujours avant."));
+}
+function nextLesson(){for(const m of MODS)for(let i=0;i<m.L.length;i++)if(!S.done[m.id+"."+i])return{m,i};return null}
+function pick(n){const w=Q.map(q=>({q,w:(S.q[q.id]||0)<=0?4:(S.q[q.id]===1?2:1)}));const out=[];
+  while(out.length<n&&w.length){let tot=w.reduce((a,x)=>a+x.w,0),r=Math.random()*tot,i=0;for(;i<w.length;i++){r-=w[i].w;if(r<=0)break}i=Math.min(i,w.length-1);out.push(w[i].q);w.splice(i,1)}return out}
+
+function vCours(v){
+  if(cur){drawLesson(v);return}
+  MODS.forEach((m,k)=>{const dn=m.L.filter((_,i)=>S.done[m.id+"."+i]).length,qs=Q.filter(q=>q.m===m.id),qm=qs.filter(q=>(S.q[q.id]||0)>=2).length;
+    const c=el("div","card");const h=el("h2",null,(k+1)+". "+m.t);if(dn===m.L.length&&qm===qs.length)h.appendChild(el("span","tag ok","acquis"));c.appendChild(h);c.appendChild(el("p","hint",m.d));
+    const bar=el("div","bar"),i=el("i");i.style.width=Math.round(dn/m.L.length*100)+"%";bar.appendChild(i);c.appendChild(bar);
+    m.L.forEach((l,j)=>{const b=el("button","opt",(S.done[m.id+"."+j]?"✓ ":"")+l.t);b.addEventListener("click",()=>openLesson(m,j));c.appendChild(b)});
+    const qb=el("button","b","Quiz du module · "+qm+" / "+qs.length);qb.style.marginTop="10px";qb.addEventListener("click",()=>startQuiz(qs.slice().sort(()=>Math.random()-.5),"Quiz : "+m.t,false));c.appendChild(qb);
+    v.appendChild(c)});
+}
+function openLesson(m,i){cur={m,i};draw()}
+function drawLesson(v){const{m,i}=cur,l=m.L[i];
+  const back=el("button","b","‹ Parcours");back.addEventListener("click",()=>{cur=null;draw()});v.appendChild(back);
+  const c=el("div","card lesson");c.style.marginTop="12px";c.appendChild(el("p","hint",m.t+" · leçon "+(i+1)+" / "+m.L.length));c.appendChild(el("h2",null,l.t));
+  (l.p||[]).forEach(t=>c.appendChild(el("p",null,t)));
+  if(l.u){const ul=el("ul");l.u.forEach(t=>ul.appendChild(el("li",null,t)));c.appendChild(ul)}
+  v.appendChild(c);
+  const r=el("div","row");
+  const ok=el("button","b p",S.done[m.id+"."+i]?"Leçon lue ✓":"J'ai compris");ok.addEventListener("click",()=>{S.done[m.id+"."+i]=1;save();if(i+1<m.L.length)openLesson(m,i+1);else{cur=null;draw()}});r.appendChild(ok);
+  if(i+1<m.L.length){const nx=el("button","b","Suivante ›");nx.addEventListener("click",()=>openLesson(m,i+1));r.appendChild(nx)}
+  v.appendChild(r);
+}
+
+/* ---------- quiz ---------- */
+function startQuiz(list,title,daily){const v=$("view");let k=0,score=0;
+  function step(){v.textContent="";window.scrollTo(0,0);
+    if(k>=list.length){const c=el("div","card");c.appendChild(el("h2",null,"Résultat : "+score+" / "+list.length));
+      c.appendChild(el("p","hint",score===list.length?"Sans faute.":score>=list.length*0.6?"Bien. Les questions ratées reviendront.":"À revoir : relis le module concerné, puis recommence."));
+      if(daily){S.days[dayKey()]=Math.max(S.days[dayKey()]||0,score)}save();
+      const b=el("button","b p","Terminer");b.style.marginTop="10px";b.addEventListener("click",draw);c.appendChild(b);v.appendChild(c);return}
+    const q=list[k],c=el("div","card");c.appendChild(el("p","hint",title+" · "+(k+1)+" / "+list.length));c.appendChild(el("h2",null,q.q));
+    const exp=el("div","exp");exp.setAttribute("role","status");let answered=false;
+    q.o.forEach((o,i)=>{const b=el("button","opt",o);b.addEventListener("click",()=>{if(answered)return;answered=true;
+      const good=i===q.a;if(good){score++;S.q[q.id]=Math.min(3,(S.q[q.id]||0)+1)}else S.q[q.id]=0;
+      c.querySelectorAll(".opt").forEach((x,j)=>{x.disabled=true;if(j===q.a)x.classList.add("good");else if(j===i)x.classList.add("bad")});
+      exp.textContent=(good?"Juste. ":"Pas tout à fait. ")+q.e;nx.hidden=false;nx.focus()});c.appendChild(b)});
+    c.appendChild(exp);const nx=el("button","b p",k+1<list.length?"Suivante":"Voir le résultat");nx.hidden=true;nx.style.marginTop="10px";nx.addEventListener("click",()=>{k++;step()});c.appendChild(nx);v.appendChild(c)}
+  step();
+}
+
+/* ---------- calculs ---------- */
+const num=v=>{const n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:0};
+const f1=n=>(Math.round(n*10)/10).toLocaleString("fr-FR");
+function field(g,label,id,val,type){const d=el("div");const l=el("label",null,label);l.htmlFor=id;const i=el("input");i.id=id;i.type=type||"text";if(!type)i.inputMode="decimal";i.value=val==null?"":val;d.appendChild(l);d.appendChild(i);g.appendChild(d);return i}
+function calc(v,title,hint,build){const c=el("div","card");c.appendChild(el("h2",null,title));c.appendChild(el("p","hint",hint));const g=el("div","kv");c.appendChild(g);const r=el("div","res");r.setAttribute("aria-live","polite");c.appendChild(r);
+  const upd=build(g,r);c.addEventListener("input",upd);upd();v.appendChild(c)}
+function hhmm(str,addH){const m=/^(\d{1,2}):(\d{2})$/.exec(str||"");if(!m)return null;let t=(+m[1])*60+(+m[2])+Math.round(addH*60);const d=Math.floor(t/1440);t=((t%1440)+1440)%1440;return p2(Math.floor(t/60))+" h "+p2(t%60)+(d>0?" (J+"+d+")":"")}
+function vCalc(v){
+  calc(v,"Cadence d'un portique","Mouvements réalisés, durée brute et arrêts.",(g,r)=>{const a=field(g,"Mouvements","k1","168"),b=field(g,"Heures brutes","k2","7"),c=field(g,"Arrêts (minutes)","k3","60");
+    return()=>{const m=num(a.value),h=num(b.value),s=num(c.value)/60;r.textContent="";if(m<=0||h<=0){r.textContent="Saisis les mouvements et la durée.";return}
+      r.appendChild(el("b",null,f1(m/h)+" mvts/h brut"));r.appendChild(el("div",null,h-s>0?"Net : "+f1(m/(h-s))+" mvts/h sur "+f1(h-s)+" h travaillées":"Les arrêts dépassent la durée."))}});
+  calc(v,"Heure de fin des opérations","Mouvements restants et cadence réelle de chaque portique. Laisse vide un portique non utilisé.",(g,r)=>{
+    const st=field(g,"Heure actuelle","e0",p2(new Date().getHours())+":"+p2(new Date().getMinutes()),"time"),fx=field(g,"Temps fixes à ajouter (min)","e9","30");
+    const P=[1,2,3,4].map(n=>[field(g,"Portique "+n+" : restants","e"+n+"a",n===1?"150":n===2?"90":""),field(g,"Portique "+n+" : cadence","e"+n+"b",n<3?"25":"")]);
+    return()=>{r.textContent="";const rows=P.map(([a,b],i)=>({n:i+1,m:num(a.value),c:num(b.value)})).filter(x=>x.m>0&&x.c>0);if(!rows.length){r.textContent="Saisis au moins un portique.";return}
+      rows.forEach(x=>x.h=x.m/x.c);const lc=rows.reduce((a,x)=>x.h>a.h?x:a,rows[0]),tot=lc.h+num(fx.value)/60;
+      r.appendChild(el("b",null,"Fin estimée : "+(hhmm(st.value,tot)||"dans "+f1(tot)+" h")));
+      r.appendChild(el("div",null,"Long crane : portique "+lc.n+", "+f1(lc.h)+" h restantes"));
+      rows.forEach(x=>r.appendChild(el("div","hint","Portique "+x.n+" : "+f1(x.h)+" h")))}});
+  calc(v,"Productivité du navire","Pour le rapport d'escale.",(g,r)=>{const a=field(g,"Total des mouvements","b1","900"),b=field(g,"Heures à quai","b2","18"),c=field(g,"Total heures portique","b3","40"),d=field(g,"Heures de travail navire","b4","16");
+    return()=>{r.textContent="";const m=num(a.value),q=num(b.value),ch=num(c.value),w=num(d.value);
+      if(m>0&&q>0)r.appendChild(el("b",null,f1(m/q)+" mvts/h à quai"));
+      if(m>0&&ch>0)r.appendChild(el("div",null,"Cadence moyenne par portique : "+f1(m/ch)+" mvts/h"));
+      if(ch>0&&w>0)r.appendChild(el("div",null,"Intensité : "+f1(ch/w)+" portiques en moyenne"));
+      if(!r.childNodes.length)r.textContent="Saisis les valeurs."}});
+  calc(v,"Occupation du parc","Avant et après le prochain navire.",(g,r)=>{const a=field(g,"Capacité (EVP)","p1","4000"),b=field(g,"EVP présents","p2","2800"),c=field(g,"À décharger (EVP)","p3","600"),d=field(g,"Sorties prévues (EVP)","p4","200");
+    return()=>{r.textContent="";const cap=num(a.value),now=num(b.value);if(cap<=0){r.textContent="Saisis la capacité.";return}
+      const after=now+num(c.value)-num(d.value);r.appendChild(el("b",null,"Aujourd'hui : "+f1(now/cap*100)+" %"));
+      r.appendChild(el("div",null,"Après le navire : "+f1(after/cap*100)+" % ("+Math.round(after).toLocaleString("fr-FR")+" EVP)"));
+      r.appendChild(el("div","hint",after>cap?"Dépassement de capacité : il manque "+Math.round(after-cap)+" EVP de place.":after/cap>0.8?"Au-dessus de 80 % : prévoir du rangement et des sorties.":"Marge correcte."))}});
+  calc(v,"Conversion en EVP","",(g,r)=>{const a=field(g,"Conteneurs de 20 pieds","t1","120"),b=field(g,"Conteneurs de 40 pieds","t2","200");
+    return()=>{const x=num(a.value),y=num(b.value);r.textContent="";r.appendChild(el("b",null,Math.round(x+2*y).toLocaleString("fr-FR")+" EVP"));r.appendChild(el("div",null,Math.round(x+y).toLocaleString("fr-FR")+" mouvements"))}});
+  calc(v,"Vérifier un numéro de conteneur","Norme ISO 6346 : 4 lettres et 7 chiffres.",(g,r)=>{const a=field(g,"Numéro","n1","CSQU3054383","text");a.inputMode="text";a.autocapitalize="characters";a.parentNode.style.gridColumn="1 / -1";
+    return()=>{r.textContent="";const s=a.value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(!/^[A-Z]{4}\d{6,7}$/.test(s)){r.textContent="Saisis 4 lettres puis 6 ou 7 chiffres.";return}
+      const cd=checkDigit(s.slice(0,10));if(s.length===10){r.appendChild(el("b",null,"Chiffre de contrôle : "+cd));return}
+      r.appendChild(el("b",null,+s[10]===cd?"Numéro valide":"Numéro incorrect"));if(+s[10]!==cd)r.appendChild(el("div",null,"Le chiffre de contrôle devrait être "+cd+". Vérifie la saisie."))}});
+}
+function checkDigit(s){let sum=0;for(let i=0;i<10;i++){const ch=s[i];let v;if(/\d/.test(ch))v=+ch;else{v=ch.charCodeAt(0)-55;v+=Math.floor((v-1)/10)}sum+=v*Math.pow(2,i)}return sum%11%10}
+
+/* ---------- check-lists ---------- */
+function vCheck(v){v.appendChild(el("p","hint","À cocher pendant l'escale. « Remettre à zéro » avant le navire suivant."));
+  CHK.forEach(c=>{const card=el("div","card");card.appendChild(el("h2",null,c.t));
+    c.i.forEach((t,i)=>{const k=c.id+"."+i,lab=el("label","chk"+(S.chk[k]?" done":"")),cb=el("input");cb.type="checkbox";cb.checked=!!S.chk[k];
+      cb.addEventListener("change",()=>{if(cb.checked)S.chk[k]=1;else delete S.chk[k];lab.classList.toggle("done",cb.checked);save()});lab.appendChild(cb);lab.appendChild(el("span",null,t));card.appendChild(lab)});
+    const b=el("button","b","Remettre à zéro");b.style.marginTop="10px";b.addEventListener("click",()=>{c.i.forEach((_,i)=>delete S.chk[c.id+"."+i]);save();draw()});card.appendChild(b);v.appendChild(card)});
+  v.style.marginBottom="0";
+}
+
+/* ---------- lexique ---------- */
+function vLex(v){const i=el("input","t");i.type="search";i.placeholder="Chercher un mot, en anglais ou en français";i.setAttribute("aria-label","Chercher dans le lexique");v.appendChild(i);
+  const g=el("div","gl");g.style.marginTop="12px";v.appendChild(g);
+  const fill=()=>{const s=i.value.trim().toLowerCase();g.textContent="";const L=LEX.filter(x=>!s||(x[0]+" "+x[1]).toLowerCase().includes(s));
+    L.forEach(x=>{const d=el("div");d.appendChild(el("b",null,x[0]));d.appendChild(document.createTextNode(" · "+x[1]));g.appendChild(d)});
+    if(!L.length)g.appendChild(el("p","hint","Aucun mot trouvé."))};
+  i.addEventListener("input",fill);fill();
+}
+
+/* ================= DÉMARRAGE ================= */
+draw();
+(async()=>{let db=null,user=null,uid=null;
+  try{if(window.claude&&typeof window.claude.use==="function")[db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")])}catch(e){}
+  try{uid=user?await user.id():null}catch(e){}
+  if(!db||!uid){say("Hors connexion : ta progression reste sur cet appareil.");return}
+  col=db.collection("data/users/"+uid);
+  try{const s=await col.doc("form_state").get();const x=s.exists?s.data():null;
+    if(x&&typeof x.v==="string"&&(+x.t||0)>(S.t||0)){const o=JSON.parse(x.v);if(o&&typeof o==="object"){S=Object.assign({done:{},q:{},days:{},chk:{},t:0},o);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!cur&&!document.querySelector(".opt.good,.opt.bad"))draw()}}
+    else if(S.t)push()}catch(e){}
+})();
+window.addEventListener("pagehide",()=>{if(timer){clearTimeout(timer);push()}});
+})();
+</script>
+</body>
+</html>

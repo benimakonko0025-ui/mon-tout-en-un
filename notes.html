@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0d0e11"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script src="tea.js"></script>
+<title>Mes documents</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0e11;--card:rgba(255,255,255,.045);--line:rgba(255,255,255,.1);--ink:#f2f3f5;--muted:#9aa1ac;--accent:#ff6a1a;--accent2:#ff8a3d}
+body{font-family:Outfit,system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));line-height:1.55}
+.wrap{max-width:760px;margin:0 auto}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.top h1{font-size:22px;font-weight:600;flex:1;min-width:0}
+.top h1 b{color:var(--accent)}
+button,.btn{font:inherit;font-weight:600;border:0;border-radius:11px;padding:10px 14px;cursor:pointer;background:rgba(255,255,255,.1);color:var(--ink)}
+button.primary{background:var(--accent);color:#fff}
+button.danger{background:rgba(255,90,90,.14);color:#ff9a9a}
+button:disabled{opacity:.5;cursor:default}
+.hint{color:var(--muted);font-size:13.5px}
+.list{display:grid;gap:10px}
+.item{display:block;width:100%;text-align:left;padding:15px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);font-weight:400}
+.item b{display:block;font-size:16px;font-weight:600}
+.item small{color:var(--muted);font-size:12.5px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar .sp{flex:1}
+#status{color:var(--muted);font-size:12.5px;min-height:1.2em;margin-bottom:10px}
+/* lecture */
+.doc h1{font-size:25px;line-height:1.25;margin:0 0 14px}
+.doc h2{font-size:20px;margin:26px 0 10px;color:var(--accent2)}
+.doc h3{font-size:17px;margin:22px 0 8px}
+.doc h4{font-size:15.5px;margin:18px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.doc p{margin:0 0 12px;overflow-wrap:anywhere}
+.doc ul,.doc ol{margin:0 0 12px 22px}
+.doc li{margin:4px 0;overflow-wrap:anywhere}
+.doc blockquote{border-left:3px solid var(--accent);padding:8px 14px;margin:0 0 14px;background:var(--card);border-radius:0 10px 10px 0;font-style:italic}
+.doc blockquote p{margin:0}
+.doc .tw{overflow-x:auto;margin:0 0 14px;border:1px solid var(--line);border-radius:12px}
+.doc table{border-collapse:collapse;width:100%;font-size:14px}
+.doc th,.doc td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.doc th{background:rgba(255,255,255,.06);font-weight:600;white-space:nowrap}
+.doc tr:last-child td{border-bottom:0}
+.doc hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+/* écriture */
+#eTitle{width:100%;font:inherit;font-size:19px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+#eBody{width:100%;min-height:55vh;font:15px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical}
+#eTitle:focus,#eBody:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.help{margin-top:8px}
+.help code{background:rgba(255,255,255,.08);border-radius:5px;padding:1px 5px;font-size:12.5px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <button type="button" id="back" hidden aria-label="Retour à la liste">‹ Liste</button>
+    <h1 id="head">Mes <b>documents</b></h1>
+    <button type="button" class="primary" id="new">+ Nouveau</button>
+  </div>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <section id="vList">
+    <div class="list" id="list"></div>
+    <p class="hint" id="empty" hidden style="margin-top:14px">Aucun document pour l'instant. Touche « + Nouveau » pour écrire le premier.</p>
+  </section>
+
+  <section id="vDoc" hidden>
+    <div class="bar">
+      <button type="button" class="primary" id="edit">Modifier</button>
+      <span class="sp"></span>
+      <button type="button" class="danger" id="del">Supprimer</button>
+    </div>
+    <article class="doc" id="read"></article>
+    <div id="write" hidden>
+      <input id="eTitle" maxlength="140" placeholder="Titre du document" aria-label="Titre du document">
+      <textarea id="eBody" placeholder="Écris ici…" aria-label="Texte du document"></textarea>
+      <p class="hint help">Mise en forme : <code># Titre</code> <code>## Sous-titre</code> <code>- liste</code> <code>1. liste numérotée</code> <code>**gras**</code> <code>*italique*</code> <code>&gt; citation</code>. Tout est enregistré tout seul.</p>
+    </div>
+  </section>
+</div>
+
+<div id="bmk-nav"><button id="bmk-btn" aria-label="Mes apps">☰</button><div id="bmk-panel"><a href="index.html" class="bmk-home">⌂ Toutes mes apps</a><a href="moncap.html">🧭 Mon Cap 2026</a><a href="shift.html">⚓ Shift Planeur</a><a href="formation.html">🎓 Académie Planner</a><a href="budget.html">💰 Budget</a><a href="carnet.html">🪞 Carnet de Cohérence</a><a href="forex.html">📈 Desk Forex</a><a href="conteneur.html">📦 Anatomie du conteneur</a><a href="notes.html">📖 Mes documents</a></div></div><style>#bmk-nav{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483000;font-family:system-ui,sans-serif}#bmk-btn{width:30px;height:54px;border:0;border-radius:0 12px 12px 0;background:#ff6a1a;color:#fff;font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;opacity:.85;padding:0}#bmk-panel{display:none;position:absolute;left:34px;top:50%;transform:translateY(-50%);background:#17191e;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5)}#bmk-nav.on #bmk-panel{display:block}#bmk-panel a{display:block;padding:10px 12px;border-radius:9px;color:#f2f3f5;text-decoration:none;font-size:14.5px}#bmk-panel a:hover{background:rgba(255,255,255,.08)}#bmk-panel .bmk-home{color:#ff8a3d;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);border-radius:9px 9px 0 0}</style><script>(function(){var n=document.getElementById("bmk-nav");document.getElementById("bmk-btn").addEventListener("click",function(e){e.stopPropagation();n.classList.toggle("on")});document.addEventListener("click",function(e){if(!n.contains(e.target))n.classList.remove("on")})})();</script>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const CACHE="notes-cache-v1";
+let DOCS={};            // id -> {title, body, t}
+let col=null,cur=null,editing=false,timer=null,dirty=false,loaded=false;
+try{const c=JSON.parse(localStorage.getItem(CACHE));if(c&&typeof c==="object")DOCS=c}catch(e){}
+const cache=()=>{try{localStorage.setItem(CACHE,JSON.stringify(DOCS))}catch(e){}};
+const say=t=>{$("status").textContent=t||""};
+const hm=t=>{const d=new Date(t),p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+" à "+p(d.getHours())+"h"+p(d.getMinutes())};
+
+/* ---------- petit rendu Markdown, sans HTML libre ---------- */
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function inline(s){
+  s=esc(s.replace(/\\([_*#>|\[\]-])/g,"\u0001$1"));
+  s=s.replace(/\*\*([^*]+?)\*\*/g,"<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g,"$1<em>$2</em>");
+  return s.replace(/\u0001/g,"");
+}
+const cells=l=>l.trim().replace(/^\||\|$/g,"").split("|").map(c=>c.trim());
+function render(md){
+  const L=String(md||"").replace(/\r/g,"").split("\n");let out=[],i=0,para=[];
+  const flush=()=>{if(para.length){out.push("<p>"+para.map(inline).join("<br>")+"</p>");para=[]}};
+  while(i<L.length){const l=L[i];
+    if(!l.trim()){flush();i++;continue}
+    let m;
+    if((m=l.match(/^(#{1,4})\s+(.*)$/))){flush();out.push("<h"+m[1].length+">"+inline(m[2])+"</h"+m[1].length+">");i++;continue}
+    if(/^\s*(-{3,}|\*{3,})\s*$/.test(l)){flush();out.push("<hr>");i++;continue}
+    if(/^>\s?/.test(l)){flush();const q=[];while(i<L.length&&/^>\s?/.test(L[i])){q.push(L[i].replace(/^>\s?/,""));i++}out.push("<blockquote><p>"+q.map(inline).join("<br>")+"</p></blockquote>");continue}
+    if(/^\s*\|.*\|\s*$/.test(l)&&i+1<L.length&&/^\s*\|?\s*:?-{2,}/.test(L[i+1])){flush();
+      const head=cells(l);i+=2;const rows=[];while(i<L.length&&/^\s*\|.*\|\s*$/.test(L[i])){rows.push(cells(L[i]));i++}
+      out.push('<div class="tw"><table><thead><tr>'+head.map(c=>"<th>"+inline(c)+"</th>").join("")+"</tr></thead><tbody>"+rows.map(r=>"<tr>"+r.map(c=>"<td>"+inline(c)+"</td>").join("")+"</tr>").join("")+"</tbody></table></div>");continue}
+    if(/^\s*[-*]\s+/.test(l)){flush();const it=[];while(i<L.length&&/^\s*[-*]\s+/.test(L[i])){it.push(L[i].replace(/^\s*[-*]\s+/,""));i++}out.push("<ul>"+it.map(x=>"<li>"+inline(x)+"</li>").join("")+"</ul>");continue}
+    if(/^\s*\d+[.)]\s+/.test(l)){flush();const it=[];while(i<L.length&&/^\s*\d+[.)]\s+/.test(L[i])){it.push(L[i].replace(/^\s*\d+[.)]\s+/,""));i++}out.push("<ol>"+it.map(x=>"<li>"+inline(x)+"</li>").join("")+"</ol>");continue}
+    para.push(l);i++}
+  flush();return out.join("\n");
+}
+
+/* ---------- écrans ---------- */
+function showList(){cur=null;editing=false;$("vDoc").hidden=true;$("vList").hidden=false;$("back").hidden=true;$("new").hidden=false;
+  $("head").innerHTML="Mes <b>documents</b>";document.title="Mes documents";
+  const ids=Object.keys(DOCS).sort((a,b)=>(DOCS[a].title||"").localeCompare(DOCS[b].title||"","fr"));
+  const el=$("list");el.textContent="";
+  ids.forEach(id=>{const d=DOCS[id],b=document.createElement("button");b.type="button";b.className="item";
+    const t=document.createElement("b");t.textContent=d.title||"Sans titre";const s=document.createElement("small");
+    const n=(d.body||"").trim().split(/\s+/).filter(Boolean).length;s.textContent=(d.t?"Modifié le "+hm(d.t)+" · ":"")+n+" mots";
+    b.appendChild(t);b.appendChild(s);b.addEventListener("click",()=>{location.hash=id});el.appendChild(b)});
+  $("empty").hidden=ids.length>0||!loaded;
+}
+function showDoc(id,startEdit){const d=DOCS[id];if(!d){showList();return}
+  cur=id;$("vList").hidden=true;$("vDoc").hidden=false;$("back").hidden=false;$("new").hidden=true;
+  $("head").textContent=d.title||"Sans titre";document.title=(d.title||"Document")+" · Mes documents";
+  setEdit(!!startEdit);window.scrollTo(0,0);
+}
+function setEdit(on){const d=DOCS[cur];if(!d)return;editing=on;
+  $("write").hidden=!on;$("read").hidden=on;$("edit").textContent=on?"Terminer":"Modifier";
+  const del=$("del");del.dataset.c="";del.textContent="Supprimer";
+  if(on){$("eTitle").value=d.title||"";$("eBody").value=d.body||""}
+  else{$("read").innerHTML=render(d.body);$("head").textContent=d.title||"Sans titre"}
+}
+function route(){flush();const id=decodeURIComponent((location.hash||"").slice(1));if(id&&DOCS[id])showDoc(id);else showList()}
+
+/* ---------- enregistrement ---------- */
+async function push(id){const d=DOCS[id];if(!d)return;cache();
+  if(!col){say("Enregistré sur cet appareil. La synchronisation reprendra à la prochaine connexion.");return}
+  try{await col.doc(id).set({title:d.title||"",body:d.body||"",t:d.t||Date.now(),kind:"doc"});say("Enregistré dans ton compte · "+hm(Date.now()))}
+  catch(e){say("Enregistrement en ligne impossible pour le moment : gardé sur cet appareil.")}
+}
+function flush(){if(timer){clearTimeout(timer);timer=null}if(dirty&&cur){dirty=false;push(cur)}}
+function touch(){if(!cur||!DOCS[cur])return;const d=DOCS[cur];d.title=$("eTitle").value.trim();d.body=$("eBody").value;d.t=Date.now();dirty=true;cache();
+  say("Modification en cours…");clearTimeout(timer);timer=setTimeout(flush,800)}
+$("eTitle").addEventListener("input",touch);$("eBody").addEventListener("input",touch);
+$("edit").addEventListener("click",()=>{if(editing){flush();setEdit(false)}else setEdit(true)});
+$("back").addEventListener("click",()=>{flush();if(location.hash)location.hash="";else showList()});
+$("new").addEventListener("click",()=>{const id="doc_"+Date.now().toString(36);DOCS[id]={title:"",body:"",t:Date.now()};cache();cur=id;dirty=true;flush();
+  history.replaceState(null,"","#"+id);showDoc(id,true);$("eTitle").focus()});
+$("del").addEventListener("click",async()=>{const b=$("del");if(!cur)return;
+  if(!b.dataset.c){b.dataset.c="1";b.textContent="Toucher encore pour supprimer";setTimeout(()=>{if(b.dataset.c){b.dataset.c="";b.textContent="Supprimer"}},3500);return}
+  const id=cur;clearTimeout(timer);dirty=false;delete DOCS[id];cache();
+  if(col){try{await col.doc(id).delete()}catch(e){}}
+  say("Document supprimé.");if(location.hash)location.hash="";else showList()});
+window.addEventListener("hashchange",route);
+window.addEventListener("pagehide",flush);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)flush();else pull()});
+
+/* ---------- chargement depuis le compte ---------- */
+async function pull(){if(!col||dirty||editing)return;
+  try{const s=await col.get();const R={};s.docs.forEach(d=>{if(d.id.indexOf("doc_")===0){const x=d.data()||{};R[d.id]={title:String(x.title||""),body:String(x.body||""),t:+x.t||0}}});
+    // un document plus récent sur cet appareil (écrit hors connexion) est gardé et renvoyé
+    for(const id of Object.keys(DOCS)){const l=DOCS[id],r=R[id];if(!r){if(loaded)continue;if(l.t&&(l.title||l.body)){R[id]=l;col.doc(id).set({title:l.title||"",body:l.body||"",t:l.t,kind:"doc"}).catch(()=>{})}}
+      else if((l.t||0)>(r.t||0)){R[id]=l;col.doc(id).set({title:l.title||"",body:l.body||"",t:l.t,kind:"doc"}).catch(()=>{})}}
+    DOCS=R;loaded=true;cache();if(!editing)route();say("")}
+  catch(e){loaded=true;if(!editing)route();say("Lecture en ligne impossible : voici la copie gardée sur cet appareil.")}
+}
+route();
+(async()=>{say("Chargement…");let db=null,user=null,uid=null;
+  const tmo=setTimeout(()=>{if(!col)say(Object.keys(DOCS).length?"Copie de cet appareil. Connexion en cours…":"Connexion en cours…")},6000);
+  try{if(window.claude&&typeof window.claude.use==="function")[db,user]=await Promise.all([window.claude.use("db"),window.claude.use("user")])}catch(e){}
+  try{uid=user?await user.id():null}catch(e){}
+  clearTimeout(tmo);
+  if(!db||!uid){loaded=true;route();say("Hors connexion : tu vois la copie gardée sur cet appareil.");return}
+  col=db.collection("data/users/"+uid);await pull();
+})();
+})();
+</script>
+</body>
+</html>

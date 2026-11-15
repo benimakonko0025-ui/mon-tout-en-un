@@ -1,0 +1,357 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0d0e11"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script src="tea.js"></script>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Carnet de Cohérence</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: single column journal, sticky tab bar at the bottom like a phone app */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#14212e; --muted:#5c6b7a; --line:#d8dfe6;
+  --accent:#d9822b; --accent-ink:#ffffff; --ok:#2f8a5b; --soft:#fbefe2;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1720; --surface:#17222e; --ink:#e7edf3; --muted:#93a3b3; --line:#2a3a4a;
+  --accent:#f0a04b; --accent-ink:#1a1206; --ok:#5cc58f; --soft:#2a2116; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1720; --surface:#17222e; --ink:#e7edf3; --muted:#93a3b3; --line:#2a3a4a;
+  --accent:#f0a04b; --accent-ink:#1a1206; --ok:#5cc58f; --soft:#2a2116; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 96px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:1.7rem;line-height:1.15}
+h2{font-size:1.1rem}
+.eyebrow{font:500 .72rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.stats{display:flex;gap:16px}
+.stat b{display:block;font:700 1.4rem var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.hint{color:var(--muted);font-size:.9rem;margin:0}
+.row{display:flex;gap:10px;align-items:flex-start}
+.row>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+label{font-weight:600;font-size:.92rem}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{resize:vertical;min-height:64px}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tick{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--ok);font-size:1.1rem;cursor:pointer;display:grid;place-items:center}
+.tick[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.btn{font:600 1rem var(--f-body);border:0;border-radius:12px;padding:13px 16px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:9px 12px;font-size:.9rem}
+.saved{font-size:.88rem;color:var(--ok);min-height:1.2em}
+.goal{display:flex;flex-direction:column;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.goal:first-of-type{border-top:0;padding-top:0}
+.goal h3{margin:0;font:600 1rem var(--f-body)}
+.pill{font:500 .68rem var(--f-mono);text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent);align-self:flex-start}
+.but{display:flex;gap:10px;align-items:center}
+.but span{flex:1;min-width:0}
+.but.done span{text-decoration:line-through;color:var(--muted)}
+.but .tick{width:26px;height:26px;font-size:.85rem}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px 6px}
+.add{display:flex;gap:8px}
+.add input{flex:1;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cell{aspect-ratio:1;border-radius:6px;background:var(--line);max-width:100%;display:grid;place-items:center;font:500 .62rem var(--f-mono);color:var(--muted)}
+.cell[data-s="1"]{background:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.cell[data-s="2"]{background:color-mix(in srgb,var(--accent) 65%,var(--line));color:var(--accent-ink)}
+.cell[data-s="3"]{background:var(--accent);color:var(--accent-ink)}
+.entry{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.entry .d{font:500 .78rem var(--f-mono);color:var(--muted)}
+.entry p{margin:0;font-size:.94rem}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;gap:4px;
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+nav button{flex:1;max-width:180px;background:none;border:0;border-radius:10px;padding:10px 6px;font:600 .92rem var(--f-body);color:var(--muted);cursor:pointer}
+nav button[aria-selected="true"]{background:var(--soft);color:var(--accent)}
+.note{font-size:.8rem;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:no-preference){.tick{transition:background .15s}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="eyebrow" id="today-label">Aujourd'hui</div>
+      <h1 id="page-title">Ce que je demande, ce que je fais</h1>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="streak">0</b><span>jours de suite</span></div>
+      <div class="stat"><b id="jclose">–</b><span>avant le 24 sept.</span></div>
+    </div>
+  </header>
+
+  <!-- AUJOURD'HUI -->
+  <section id="v-jour" class="view">
+    <div class="wrap" style="gap:16px">
+      <div class="card">
+        <h2>Mes trois demandes</h2>
+        <p class="hint">Pour chacune : ai-je posé un acte aujourd'hui qui va dans ce sens ?</p>
+        <div id="demandes"></div>
+      </div>
+      <div class="card">
+        <h2>La pensée contraire</h2>
+        <div class="row"><div>
+          <label for="pensee">Ce que mon esprit m'a dit</label>
+          <input type="text" id="pensee" placeholder="Ex. « Je vais encore abandonner »">
+        </div></div>
+        <div class="row"><div>
+          <label for="preuve">Ma réponse par un fait</label>
+          <input type="text" id="preuve" placeholder="Ex. « J'ai révisé 30 min ce soir »">
+        </div></div>
+      </div>
+      <div class="card">
+        <h2>Demain, un seul geste</h2>
+        <input type="text" id="demain" placeholder="Un petit geste précis, faisable en 5 minutes" aria-label="Le geste de demain">
+        <p class="hint" id="hier"></p>
+      </div>
+      <button class="btn" id="save">Enregistrer ma journée</button>
+      <div class="saved" id="saved" role="status"></div>
+    </div>
+  </section>
+
+  <!-- OBJECTIFS -->
+  <section id="v-obj" class="view" hidden>
+    <div class="card" id="objectifs"></div>
+    <p class="note">Un objectif tient grâce à ses buts. Ajoute des étapes mesurables, avec une date si possible.</p>
+  </section>
+
+  <!-- HISTORIQUE -->
+  <section id="v-hist" class="view" hidden>
+    <div class="wrap" style="gap:16px">
+      <div class="card">
+        <h2>Les 28 derniers jours</h2>
+        <p class="hint">Plus la case est foncée, plus tes actes ont suivi tes demandes (0 à 3).</p>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="card" id="entries"><h2>Mes preuves</h2></div>
+    </div>
+  </section>
+
+  <p class="note" id="storage-note"></p>
+</div>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-v="v-jour" id="t-jour">Ce soir</button>
+  <button role="tab" aria-selected="false" data-v="v-obj" id="t-obj">Objectifs</button>
+  <button role="tab" aria-selected="false" data-v="v-hist" id="t-hist">Historique</button>
+</nav>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const keyOf = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const now = new Date();
+const TODAY = keyOf(now);
+const MOIS = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const JOURS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const fmt = k => { const [y,m,d]=k.split('-').map(Number); const dt=new Date(y,m-1,d); return JOURS[dt.getDay()]+' '+d+' '+MOIS[m-1]; };
+
+$('#today-label').textContent = fmt(TODAY);
+let close = new Date(now.getFullYear(),8,24); if (close < now) close = new Date(now.getFullYear()+1,8,24);
+$('#jclose').textContent = 'J-' + Math.ceil((close-now)/86400000);
+
+// Plan de départ : sert uniquement tant que rien n'est enregistré
+const DEFAULT_PLAN = {
+  demandes:['Ma première demande','Ma deuxième demande','Ma troisième demande'],
+  objectifs:[]
+};
+
+// ---- Stockage : base privée de l'artifact, sinon le navigateur ----
+const store = { db:null, uid:null,
+  async init(){
+    try{
+      if (window.claude && claude.use){
+        const [db,user] = await Promise.all([claude.use('db'),claude.use('user')]);
+        const uid = user ? await user.id() : null;
+        if (db && uid){ this.db=db; this.uid=uid; }
+      }
+    }catch(e){}
+    $('#storage-note').textContent = this.db ? 'Enregistré dans ton espace privé.' : 'Enregistré sur cet appareil uniquement.';
+  },
+  col(){ return this.db.collection('data/users/'+this.uid); },
+  async all(){
+    const out={};
+    if (this.db){ try{ const s=await this.col().get(); s.docs.forEach(d=>{ if(d.exists) out[d.id]=d.data(); }); return out; }catch(e){} }
+    try{ const raw=localStorage.getItem('coherence'); return raw?JSON.parse(raw):{}; }catch(e){ return {}; }
+  },
+  async put(id,data){
+    if (this.db){ await this.col().doc(id).set(data); return; }
+    try{ const raw=localStorage.getItem('coherence'); const o=raw?JSON.parse(raw):{}; o[id]=data; localStorage.setItem('coherence',JSON.stringify(o)); }catch(e){}
+  }
+};
+
+let plan = JSON.parse(JSON.stringify(DEFAULT_PLAN));
+let days = {}; // 'j-YYYY-MM-DD' -> entry
+let today = {actes:[{ok:false,acte:''},{ok:false,acte:''},{ok:false,acte:''}],pensee:'',preuve:'',demain:''};
+
+function score(e){ return (e && e.actes) ? e.actes.filter(a=>a.ok).length : 0; }
+function streak(){
+  let n=0; const d=new Date(now);
+  if (!(score(days['j-'+keyOf(d)])>0)) d.setDate(d.getDate()-1);
+  while (score(days['j-'+keyOf(d)])>0){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+
+function renderJour(){
+  const box=$('#demandes'); box.innerHTML='';
+  plan.demandes.forEach((dm,i)=>{
+    const a=today.actes[i];
+    const row=document.createElement('div'); row.className='row'; row.style.paddingBlock='8px';
+    row.innerHTML='<button class="tick" aria-label="Acte posé" aria-pressed="'+a.ok+'">✓</button><div><input type="text" id="dm'+i+'" aria-label="Demande '+(i+1)+'"><input type="text" id="ac'+i+'" placeholder="L\'acte concret d\'aujourd\'hui (ou rien)" aria-label="Acte '+(i+1)+'"></div>';
+    row.querySelector('#dm'+i).value=dm;
+    row.querySelector('#dm'+i).style.fontWeight='600';
+    row.querySelector('#ac'+i).value=a.acte;
+    row.querySelector('.tick').onclick=e=>{ a.ok=!a.ok; e.currentTarget.setAttribute('aria-pressed',a.ok); };
+    row.querySelector('#dm'+i).oninput=e=>{ plan.demandes[i]=e.target.value; };
+    row.querySelector('#ac'+i).oninput=e=>{ a.acte=e.target.value; if(e.target.value.trim()&&!a.ok){a.ok=true;row.querySelector('.tick').setAttribute('aria-pressed','true');} };
+    box.appendChild(row);
+  });
+  $('#pensee').value=today.pensee; $('#preuve').value=today.preuve; $('#demain').value=today.demain;
+  const y=new Date(now); y.setDate(y.getDate()-1); const hier=days['j-'+keyOf(y)];
+  $('#hier').textContent = hier && hier.demain ? 'Le geste que tu avais prévu pour aujourd\'hui : « '+hier.demain+' »' : '';
+  $('#streak').textContent=streak();
+}
+
+// ---- Objectifs : UNE seule liste (collection « goals »), la même que Mon Cap et Shift Planeur ----
+let GOALS=null;
+const gSorted=()=>Object.keys(GOALS).map(id=>Object.assign({id},GOALS[id])).filter(g=>g.status!=='dropped').sort((a,b)=>(a.level==='high'?0:1)-(b.level==='high'?0:1)||(a.order||0)-(b.order||0));
+async function gSteps(id,steps){
+  if(!GOALS||!GOALS[id]) return;
+  GOALS[id]=Object.assign({},GOALS[id],{steps}); renderObj();
+  try{ await store.db.doc('goals/'+id).update({steps}); $('#storage-note').textContent='Enregistré dans ta liste d\'objectifs.'; }
+  catch(e){ $('#storage-note').textContent='Échec de l\'enregistrement. Vérifie ta connexion et réessaie.'; }
+}
+function renderShared(box){
+  box.innerHTML='<h2>Exercice en cours</h2><p class="hint">Une seule liste : la même dans Mon Cap et Shift Planeur. Un changement ici se voit partout.</p>';
+  gSorted().forEach(o=>{
+    const st=o.steps||[];
+    const g=document.createElement('div'); g.className='goal';
+    g.innerHTML='<span class="pill"></span><h3></h3><div class="buts"></div><div class="add"><input type="text" maxlength="160" placeholder="Ajouter une étape (ex. réussir le semestre)" aria-label="Nouvelle étape"><button class="btn ghost">Ajouter</button></div>';
+    g.querySelector('.pill').textContent=(o.level==='high'?'Haute priorité':'Niveau 2')+(o.status==='done'?' · atteint':'');
+    g.querySelector('h3').textContent=o.title||'Objectif';
+    const bl=g.querySelector('.buts'), cur=()=>(GOALS[o.id]&&GOALS[o.id].steps)||[];
+    if(!st.length){ const p=document.createElement('p'); p.className='hint'; p.textContent='Aucune étape pour l\'instant.'; bl.appendChild(p); }
+    st.forEach(b=>{
+      const r=document.createElement('div'); r.className='but'+(b.done?' done':'');
+      r.innerHTML='<button class="tick" aria-label="Étape faite" aria-pressed="'+!!b.done+'">✓</button><span></span><button class="x" aria-label="Supprimer">✕</button>';
+      r.querySelector('span').textContent=b.t;
+      r.querySelector('.tick').onclick=()=>gSteps(o.id,cur().map(y=>y.id===b.id?Object.assign({},y,{done:!y.done}):y));
+      r.querySelector('.x').onclick=()=>gSteps(o.id,cur().filter(y=>y.id!==b.id));
+      bl.appendChild(r);
+    });
+    const inp=g.querySelector('.add input');
+    const add=()=>{ const t=inp.value.trim(); if(!t) return; inp.value=''; gSteps(o.id,cur().concat({id:'s'+Date.now().toString(36),t,done:false})); };
+    g.querySelector('.add button').onclick=add;
+    inp.onkeydown=e=>{ if(e.key==='Enter') add(); };
+    box.appendChild(g);
+  });
+}
+// Reprise unique des buts déjà notés ici vers la liste partagée (rien n'est supprimé de l'ancien plan)
+const OLD_MAP={o1:'g1',o2:'g2',o3:'g3',o4:'g6',o5:'g5',o6:'g7'};
+async function migrateButs(){
+  if(!GOALS||!Object.keys(GOALS).length||!planLoaded||plan.butsMig) return;
+  plan.butsMig=true;
+  for(const o of (plan.objectifs||[])){
+    const gid=OLD_MAP[o.id]; if(!gid||!GOALS[gid]||!(o.buts||[]).length) continue;
+    const steps=(GOALS[gid].steps||[]).slice(); let n=0;
+    o.buts.forEach((b,i)=>{ const t=String(b.t||'').trim(); if(!t) return;
+      if(steps.some(x=>String(x.t||'').trim().toLowerCase()===t.toLowerCase())) return;
+      steps.push({id:'sc'+Date.now().toString(36)+i,t,done:!!b.fait}); n++; });
+    if(n){ GOALS[gid]=Object.assign({},GOALS[gid],{steps}); try{ await store.db.doc('goals/'+gid).update({steps}); }catch(e){ plan.butsMig=false; } }
+  }
+  if(plan.butsMig){ try{ await store.put('plan',plan); }catch(e){} }
+  renderObj();
+}
+let planLoaded=false;
+function watchGoals(){
+  if(!store.db) return;
+  try{ store.db.collection('goals').onSnapshot(s=>{
+    const o={}; s.docs.forEach(d=>{ o[d.id]=d.data()||{}; }); GOALS=o;
+    const ae=document.activeElement;
+    if(!(ae&&ae.tagName==='INPUT'&&ae.value&&$('#objectifs').contains(ae))) renderObj();
+    migrateButs();
+  },()=>{}); }catch(e){}
+}
+
+function renderObj(){
+  const box=$('#objectifs');
+  if(GOALS&&Object.keys(GOALS).length){ renderShared(box); return; }
+  box.innerHTML='<h2>Exercice en cours</h2>';
+  plan.objectifs.forEach(o=>{
+    const g=document.createElement('div'); g.className='goal';
+    g.innerHTML='<span class="pill"></span><h3></h3><div class="buts"></div><div class="add"><input type="text" placeholder="Ajouter un but (ex. réussir le semestre)" aria-label="Nouveau but"><button class="btn ghost">Ajouter</button></div>';
+    g.querySelector('.pill').textContent=o.niveau; g.querySelector('h3').textContent=o.titre;
+    const bl=g.querySelector('.buts');
+    if(!o.buts.length){ const p=document.createElement('p'); p.className='hint'; p.textContent='Aucun but pour l\'instant.'; bl.appendChild(p); }
+    o.buts.forEach((b,j)=>{
+      const r=document.createElement('div'); r.className='but'+(b.fait?' done':'');
+      r.innerHTML='<button class="tick" aria-label="But atteint" aria-pressed="'+!!b.fait+'">✓</button><span></span><button class="x" aria-label="Supprimer">✕</button>';
+      r.querySelector('span').textContent=b.t;
+      r.querySelector('.tick').onclick=async()=>{ b.fait=!b.fait; await savePlan(); renderObj(); };
+      r.querySelector('.x').onclick=async()=>{ o.buts.splice(j,1); await savePlan(); renderObj(); };
+      bl.appendChild(r);
+    });
+    const inp=g.querySelector('.add input');
+    const add=async()=>{ const t=inp.value.trim(); if(!t) return; o.buts.push({t,fait:false}); await savePlan(); renderObj(); };
+    g.querySelector('.add button').onclick=add;
+    inp.onkeydown=e=>{ if(e.key==='Enter') add(); };
+    box.appendChild(g);
+  });
+}
+
+function renderHist(){
+  const grid=$('#grid'); grid.innerHTML='';
+  for(let i=27;i>=0;i--){ const d=new Date(now); d.setDate(d.getDate()-i); const k=keyOf(d);
+    const c=document.createElement('div'); c.className='cell'; c.dataset.s=score(days['j-'+k]); c.textContent=d.getDate(); c.title=fmt(k); grid.appendChild(c); }
+  const box=$('#entries'); box.innerHTML='<h2>Mes preuves</h2>';
+  const keys=Object.keys(days).sort().reverse().slice(0,30);
+  if(!keys.length){ const p=document.createElement('p'); p.className='hint'; p.textContent='Ta première journée enregistrée apparaîtra ici.'; box.appendChild(p); return; }
+  keys.forEach(k=>{ const e=days[k]; const el=document.createElement('div'); el.className='entry';
+    const d=document.createElement('span'); d.className='d'; d.textContent=fmt(k.slice(2))+' · '+score(e)+'/3 actes'; el.appendChild(d);
+    (e.actes||[]).forEach(a=>{ if(a.ok&&a.acte){ const p=document.createElement('p'); p.textContent='✓ '+a.acte; el.appendChild(p);} });
+    if(e.preuve){ const p=document.createElement('p'); p.textContent='Preuve : '+e.preuve; el.appendChild(p); }
+    if(e.demain){ const p=document.createElement('p'); p.style.color='var(--muted)'; p.textContent='Geste prévu : '+e.demain; el.appendChild(p); }
+    box.appendChild(el); });
+}
+
+async function savePlan(){ try{ await store.put('plan',plan); }catch(e){ $('#saved').textContent='Échec de l\'enregistrement. Réessaie dans un instant.'; } }
+
+$('#pensee').oninput=e=>today.pensee=e.target.value;
+$('#preuve').oninput=e=>today.preuve=e.target.value;
+$('#demain').oninput=e=>today.demain=e.target.value;
+$('#save').onclick=async()=>{
+  const btn=$('#save'); btn.disabled=true;
+  const entry={date:TODAY,demandes:plan.demandes.slice(),actes:today.actes,pensee:today.pensee,preuve:today.preuve,demain:today.demain};
+  try{ await store.put('plan',plan); await store.put('j-'+TODAY,entry); days['j-'+TODAY]=entry;
+    $('#saved').textContent='Journée enregistrée : '+score(entry)+'/3 actes alignés.'; renderJour(); }
+  catch(e){ $('#saved').textContent='Échec de l\'enregistrement. Vérifie ta connexion et réessaie.'; }
+  btn.disabled=false;
+};
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!==b.dataset.v);
+  if(b.dataset.v==='v-hist') renderHist(); if(b.dataset.v==='v-obj') renderObj();
+  window.scrollTo(0,0);
+});
+
+renderJour(); renderObj();
+store.init().then(async()=>{
+  const all=await store.all();
+  if(all.plan) plan=all.plan;
+  if(!Array.isArray(plan.objectifs)) plan.objectifs=[];
+  planLoaded=true; watchGoals(); migrateButs();
+  Object.keys(all).forEach(k=>{ if(k.startsWith('j-')) days[k]=all[k]; });
+  if(days['j-'+TODAY]){ const e=days['j-'+TODAY]; today={actes:e.actes,pensee:e.pensee||'',preuve:e.preuve||'',demain:e.demain||''}; }
+  renderJour(); renderObj();
+});
+})();
+</script>
+
+<div id="bmk-nav"><button id="bmk-btn" aria-label="Mes apps">☰</button><div id="bmk-panel"><a href="index.html" class="bmk-home">⌂ Toutes mes apps</a><a href="moncap.html">🧭 Mon Cap 2026</a><a href="shift.html">⚓ Shift Planeur</a><a href="formation.html">🎓 Académie Planner</a><a href="budget.html">💰 Budget</a><a href="carnet.html">🪞 Carnet de Cohérence</a><a href="forex.html">📈 Desk Forex</a><a href="conteneur.html">📦 Anatomie du conteneur</a><a href="notes.html">📖 Mes documents</a></div></div><style>#bmk-nav{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147483000;font-family:system-ui,sans-serif}#bmk-btn{width:30px;height:54px;border:0;border-radius:0 12px 12px 0;background:#ff6a1a;color:#fff;font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;opacity:.85}#bmk-panel{display:none;position:absolute;left:34px;top:50%;transform:translateY(-50%);background:#17191e;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:6px;min-width:210px;box-shadow:0 12px 40px rgba(0,0,0,.5)}#bmk-nav.on #bmk-panel{display:block}#bmk-panel a{display:block;padding:10px 12px;border-radius:9px;color:#f2f3f5;text-decoration:none;font-size:14.5px}#bmk-panel a:hover{background:rgba(255,255,255,.08)}#bmk-panel .bmk-home{color:#ff8a3d;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);border-radius:9px 9px 0 0}</style><script>(function(){var n=document.getElementById("bmk-nav");document.getElementById("bmk-btn").addEventListener("click",function(e){e.stopPropagation();n.classList.toggle("on")});document.addEventListener("click",function(e){if(!n.contains(e.target))n.classList.remove("on")})})();</script>
+</body></html>

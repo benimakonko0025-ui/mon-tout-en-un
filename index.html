@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0d0e11"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<script src="tea.js"></script>
+<title>Mon tout-en-un</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Outfit,system-ui,sans-serif;color:#f2f3f5;min-height:100vh;background:radial-gradient(800px 500px at 90% -10%,rgba(255,106,26,.18),transparent 60%),#0d0e11;padding:calc(20px + env(safe-area-inset-top)) 16px calc(30px + env(safe-area-inset-bottom))}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:24px;font-weight:600}h1 b{color:#ff6a1a}
+.sub{color:#9aa1ac;margin:4px 0 22px;font-size:14px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#9aa1ac;margin:22px 0 10px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+a.app{display:flex;gap:14px;align-items:center;padding:16px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);color:inherit;text-decoration:none;transition:transform .15s,background .15s}
+a.app:hover,a.app:active{transform:translateY(-2px);background:rgba(255,255,255,.08)}
+a.app.main{background:linear-gradient(135deg,#ff6a1a,#ff9248);border:0;box-shadow:0 10px 30px rgba(255,106,26,.3)}
+a.app.main small{color:rgba(255,255,255,.85)}
+.ic{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:22px;flex:none}
+.main .ic{background:rgba(255,255,255,.22)}
+.t b{display:block;font-weight:600;font-size:15.5px}.t small{color:#9aa1ac;font-size:12.5px;line-height:1.35;display:block;margin-top:2px}
+.go{margin-left:auto;opacity:.5;font-size:18px}
+.tip{margin-top:26px;padding:14px;border-radius:14px;background:rgba(255,255,255,.04);font-size:13.5px;color:#9aa1ac;line-height:1.5}
+.bk{padding:16px;border-radius:18px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09)}
+.bk-t b{display:block;font-size:15.5px}.bk-t small{color:#9aa1ac;font-size:12.5px}.bk-t small.late{color:#ffc244}
+.bk-b{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.bk-b button,.bk-b label{font:inherit;font-weight:600;border:0;border-radius:11px;padding:10px 16px;cursor:pointer;background:#ff6a1a;color:#fff}
+.bk-b .ghost{background:rgba(255,255,255,.1);color:#f2f3f5}
+#bk-msg{font-size:13.5px;color:#9aa1ac;margin-top:10px;line-height:1.45}#bk-msg b{color:#f2f3f5}
+#bk-msg button{font:inherit;border:0;border-radius:9px;padding:7px 12px;margin:8px 8px 0 0;cursor:pointer;background:#ff6a1a;color:#fff;font-weight:600}
+#bk-msg button.g{background:rgba(255,255,255,.1);color:#f2f3f5}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Mon <b>tout-en-un</b></h1>
+<div class="tip" id="tea-acct" hidden style="margin:0 0 14px"></div>
+<div class="sub">Toutes tes apps au même endroit. Dans chaque app, le bouton orange ☰ sur le bord gauche te ramène ici ou t'envoie vers une autre.</div>
+
+<button id="tea-install" hidden type="button" style="font:inherit;font-weight:600;border:0;border-radius:12px;padding:11px 16px;background:#ff6a1a;color:#fff;cursor:pointer;margin-bottom:6px">📲 Installer l'application</button>
+<h2>Tous les jours</h2>
+<div class="grid">
+<a class="app main" href="moncap.html"><span class="ic">🧭</span><span class="t"><b>Mon Cap 2026</b><small>Ma journée, mes objectifs (liste unique), chantier</small></span><span class="go">›</span></a>
+<a class="app" href="carnet.html"><span class="ic">🪞</span><span class="t"><b>Carnet de Cohérence</b><small>Mes trois demandes face à mes actes du jour</small></span><span class="go">›</span></a>
+</div>
+
+<h2>Travail au port</h2>
+<div class="grid">
+<a class="app" href="formation.html"><span class="ic">🎓</span><span class="t"><b>Académie Planner</b><small>Formation planner import et superintendant, calculs, quiz du jour</small></span><span class="go">›</span></a>
+<a class="app" href="shift.html"><span class="ic">⚓</span><span class="t"><b>Shift Planeur</b><small>Anneau de shift, tâches, synthèse, rapport à copier</small></span><span class="go">›</span></a>
+<a class="app" href="conteneur.html"><span class="ic">📦</span><span class="t"><b>Anatomie du conteneur</b><small>Les parties d'un conteneur, français / anglais</small></span><span class="go">›</span></a>
+</div>
+
+<h2>Argent</h2>
+<div class="grid">
+<a class="app" href="budget.html"><span class="ic">💰</span><span class="t"><b>Budget</b><small>Enregistré dans ton compte · mois, historique, « On me doit »</small></span><span class="go">›</span></a>
+<a class="app" href="forex.html"><span class="ic">📈</span><span class="t"><b>Desk Forex</b><small>En pause conseillée</small></span><span class="go">›</span></a>
+</div>
+
+<h2>Apprendre</h2>
+<div class="grid">
+<a class="app" href="notes.html#doc_genese"><span class="ic">📖</span><span class="t"><b>Genèse – Méditations</b><small>Mes méditations, à lire et à compléter</small></span><span class="go">›</span></a>
+<a class="app" href="notes.html#doc_countries"><span class="ic">🌍</span><span class="t"><b>Countries, nationalities and currencies</b><small>Vocabulaire anglais</small></span><span class="go">›</span></a>
+<a class="app" href="notes.html"><span class="ic">🗂️</span><span class="t"><b>Tous mes documents</b><small>Pensées, notes, nouveaux textes</small></span><span class="go">›</span></a>
+</div>
+
+<h2>Sauvegarde</h2>
+<div class="bk"><div class="bk-t"><b>💾 Mes données</b><small id="bk-last">Dernière sauvegarde : jamais</small></div>
+<div class="bk-b"><button id="bk-save">Sauvegarder</button><label class="ghost">Restaurer<input type="file" id="bk-file" accept=".json,application/json" hidden></label></div>
+<div id="bk-msg"></div></div>
+<div class="tip">💡 Astuce : une sauvegarde par semaine, rangée dans ton Google Drive, et tu ne perds jamais rien.</div>
+</div>
+<script>
+(function(){
+const COLS=["goals","shifts","days","carry","perso_days","perso_eng","perso_tasks","prefixes","signals","trades","journal","bot","series"];
+const $=id=>document.getElementById(id);const msg=h=>{$("bk-msg").innerHTML=h};
+const p2=n=>String(n).padStart(2,"0");const today=()=>{const d=new Date();return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
+function showLast(){let t=null;try{t=localStorage.getItem("bk-last")}catch(e){}const el=$("bk-last");if(!t){el.textContent="Dernière sauvegarde : jamais";el.className="late";return}
+ const days=Math.floor((Date.now()-(+t))/864e5);el.textContent="Dernière sauvegarde : "+(days<1?"aujourd'hui":days===1?"hier":"il y a "+days+" jours")+(days>=7?" · pense à en refaire une":"");el.className=days>=7?"late":""}
+showLast();
+let DB=null,USER=null,DL=null;
+const ready=(async()=>{try{if(window.claude&&claude.use){[DB,USER,DL]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")])}}catch(e){}})();
+async function readCol(path){const s=await DB.collection(path).get();const o={};s.docs.forEach(d=>{o[d.id]=d.data()});return o}
+async function build(){const out={app:"tout-en-un",version:1,createdAt:new Date().toISOString(),db:{},local:{}};
+ for(const c of COLS){try{const o=await readCol(c);if(Object.keys(o).length)out.db[c]=o}catch(e){}}
+ for(const id of Object.keys(out.db.shifts||{})){try{const o=await readCol("shifts/"+id+"/tasks");if(Object.keys(o).length)out.db["shifts/"+id+"/tasks"]=o}catch(e){}}
+ try{const uid=await USER.id();if(uid){const o=await readCol("data/users/"+uid);if(Object.keys(o).length)out.db["__me__"]=o}}catch(e){}
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k!=="bk-last"&&k.indexOf("firebase:")!==0)out.local[k]=localStorage.getItem(k)}}catch(e){}
+ return out}
+$("bk-save").addEventListener("click",async()=>{msg("Préparation de la sauvegarde…");await ready;
+ if(!DB){msg("Je n'arrive pas à lire tes données ici. Ouvre cette page connecté à ton compte Google.");return}
+ let data;try{data=await build()}catch(e){msg("La lecture des données a échoué. Réessaie dans un instant.");return}
+ const n=Object.values(data.db).reduce((a,o)=>a+Object.keys(o).length,0)+Object.keys(data.local).length;
+ const txt=JSON.stringify(data);const name="tout-en-un-sauvegarde-"+today()+".json";
+ if(DL){try{await DL.save({filename:name,data:txt});try{localStorage.setItem("bk-last",String(Date.now()))}catch(e){}showLast();msg("✅ <b>"+n+" éléments sauvegardés</b> dans le fichier « "+name+" ». Range-le dans ton Google Drive.");return}catch(e){if(e&&e.code==="declined"){msg("Sauvegarde annulée.");return}if(e&&e.code==="rate_limited"){msg("Une fenêtre de sauvegarde est déjà ouverte. Réessaie dans un instant.");return}}}
+ msg("Le téléchargement n'a pas pu se faire. Copie ce texte et colle-le dans une note ou un fichier sur ton Drive :<textarea style='width:100%;margin-top:8px;height:90px;background:#000;color:#ddd;border-radius:8px;padding:8px'>"+txt.replace(/</g,"&lt;")+"</textarea>")});
+let PEND=null;
+$("bk-file").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!/^tout-en-un/.test(String(d.app||"")))throw 0;PEND=d;
+ const n=Object.values(d.db||{}).reduce((a,o)=>a+Object.keys(o).length,0);msg("Fichier du <b>"+new Date(d.createdAt).toLocaleDateString("fr-FR")+"</b> : "+n+" éléments. Les éléments du fichier remplaceront ceux qui portent le même nom ici. On restaure ?<br><button id='bk-ok'>Oui, restaurer</button><button class='g' id='bk-no'>Annuler</button>");
+ $("bk-ok").onclick=restore;$("bk-no").onclick=()=>{PEND=null;msg("")}}catch(err){msg("Ce fichier n'est pas une sauvegarde du Tout-en-un.")}};r.readAsText(f)});
+async function restore(){const d=PEND;PEND=null;await ready;if(!DB){msg("Connexion à ton compte Google nécessaire pour restaurer.");return}
+ let uid=null;try{uid=await USER.id()}catch(e){}let done=0,fail=0;const total=Object.values(d.db||{}).reduce((a,o)=>a+Object.keys(o).length,0);
+ for(const[path,docs]of Object.entries(d.db||{})){const real=path==="__me__"?(uid?"data/users/"+uid:null):path;if(!real)continue;
+  for(const[id,data]of Object.entries(docs)){try{await DB.doc(real+"/"+id).set(data);done++}catch(e){fail++}if((done+fail)%10===0)msg("Restauration… "+(done+fail)+" / "+total)}}
+ try{const L=d.local||{},now=Date.now();
+  for(const[k,v0]of Object.entries(L)){let v=v0;if(k==="budget-oct-2026-v1-sync"||k.indexOf("firebase:")===0)continue;
+   /* les données restaurées doivent l'emporter sur ce que cet appareil a déjà envoyé */
+   if(k==="terminal-command-v1")continue;if(k==="mon-cap-v1"&&uid){try{const o=JSON.parse(v);if(o&&typeof o==="object"){o._uid=uid;o._t=now;v=JSON.stringify(o)}}catch(e){}}
+   localStorage.setItem(k,v)}
+  const sy={t:{},synced:true,uid:uid};
+  try{const mm=JSON.parse(L["budget-oct-2026-v1-months"]||"null");if(mm)Object.keys(mm).forEach(k=>{sy.t["bud_m_"+k]=now})}catch(e){}
+  if(L["budget-oct-2026-v1-creances"]!=null)sy.t["bud_creances"]=now;
+  if(uid&&Object.keys(sy.t).length)localStorage.setItem("budget-oct-2026-v1-sync",JSON.stringify(sy))}catch(e){}
+ msg(fail?"Restauration terminée avec "+fail+" erreur(s) sur "+total+". Tu peux relancer.":"✅ <b>Tout est restauré</b> ("+done+" éléments). Ouvre tes apps pour vérifier.")}
+})();
+</script>
+</body>
+</html>
